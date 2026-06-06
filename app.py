@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__)
 
-# तेरे एकदम ताज़े टोकन (बैकग्राउंड पिंग के लिए)
+# तेरा ताज़ा VIP पास (बैकग्राउंड पिंग के लिए)
 ACTIVE_SSQID = "6a246501dd713"
 
 # हैकर थीम वाला वेब पेज
@@ -31,8 +31,8 @@ HTML_TEMPLATE = """
     <div class="container">
         <h2>🚀 SaleSquared VIP</h2>
         <form action="/call" method="POST">
-            <input type="text" name="ssqid" value="6a246501dd713" placeholder="👉 Enter SSQID" required><br>
-            <input type="text" name="confid" value="6a246524d39b7829073077" placeholder="👉 Enter CONFID" required><br>
+            <input type="text" name="ssqid" value="{{ active_ssqid }}" placeholder="👉 Enter SSQID" required><br>
+            <input type="text" name="confid" placeholder="👉 Enter Live CONFID" required><br>
             <input type="text" name="num1" placeholder="📞 Enter 1st Number" required><br>
             <input type="text" name="num2" placeholder="📞 Enter 2nd Number" required><br>
             <button type="submit">🔥 FIRE BOTH CALLS</button>
@@ -58,7 +58,6 @@ def fire_call(phone_number, ssqid, confid):
         "Cookie": f"ssqid={ssqid}"
     }
     
-    # नंबर के आगे 91 और -c लगाना (ताकि add-phone काम करे)
     raw_num = str(phone_number).strip()
     if not raw_num.startswith("91"):
         raw_num = f"91{raw_num}"
@@ -82,7 +81,7 @@ def fire_call(phone_number, ssqid, confid):
 
 @app.route('/')
 def index():
-    return render_template_string(HTML_TEMPLATE, result="")
+    return render_template_string(HTML_TEMPLATE, result="", active_ssqid=ACTIVE_SSQID)
 
 @app.route('/call', methods=['POST'])
 def make_call():
@@ -92,14 +91,14 @@ def make_call():
     num1 = request.form.get('num1').strip()
     num2 = request.form.get('num2').strip()
     
-    ACTIVE_SSQID = ssqid # सेशन ज़िंदा रखने के लिए अपडेट कर दिया
+    ACTIVE_SSQID = ssqid # सेशन ज़िंदा रखने के लिए नया पास सेव कर लिया
     
     res1 = fire_call(num1, ssqid, confid)
     time.sleep(2) # 2 सेकंड का गैप
     res2 = fire_call(num2, ssqid, confid)
     
     final_result = f"🎯 Number 1 ({num1}):\n{res1}\n\n🎯 Number 2 ({num2}):\n{res2}"
-    return render_template_string(HTML_TEMPLATE, result=final_result)
+    return render_template_string(HTML_TEMPLATE, result=final_result, active_ssqid=ACTIVE_SSQID)
 
 @app.route('/ping')
 def ping():
@@ -118,3 +117,4 @@ def ping():
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
+
